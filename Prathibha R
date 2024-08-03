@@ -1,0 +1,162 @@
+import pandas as pd
+import numpy as np
+
+# Set random seed for reproducibility
+np.random.seed(42)
+
+# Number of students
+num_students = 1000
+
+# Generating synthetic data
+data = {
+    'student_id': np.arange(1, num_students + 1),
+    'attendance': np.random.uniform(50, 100, num_students),
+    # Attendance in percentage
+    'homework_completion': np.random.uniform(50, 100, num_students),
+    # Homework completion rate
+    'study_hours': np.random.uniform(0, 10, num_students),
+    # Hours spent studying per week
+    'past_grades': np.random.uniform(60, 100, num_students),
+    # Average past grades
+    'extracurricular': np.random.choice([0, 1], num_students),
+    # Participation in extracurricular activities
+    'parental_support': np.random.choice([0, 1], num_students),
+    # Parental support indicator
+    'final_grade': np.random.uniform(50, 100, num_students)
+    # Final grade
+}
+
+# Creating DataFrame
+df = pd.DataFrame(data)
+
+# Adding a 'final_grade' column with a simple formula based on other features
+df['final_grade'] = (
+    0.2 * df['attendance'] +
+    0.2 * df['homework_completion'] +
+    0.3 * df['study_hours'] +
+    0.2 * df['past_grades'] +
+    0.1 * df['extracurricular'] +
+    0.1 * df['parental_support'] * 10
+).clip(0, 100)
+
+# Save dataset to CSV
+df.to_csv('student_performance.csv', index=False)
+
+print(df.head()) 
+
+from google.colab import files
+files.download('student_performance.csv')
+# Adding flies 
+
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set random seed for reproducibility
+np.random.seed(42)
+
+# Generate synthetic data
+num_students = 1000
+data = {
+    'student_id': np.arange(1, num_students + 1),
+    'attendance': np.random.uniform(50, 100, num_students),
+    # Attendance in percentage
+    'homework_completion': np.random.uniform(50, 100, num_students),
+    # Homework completion rate
+    'study_hours': np.random.uniform(0, 10, num_students),
+    # Hours spent studying per week
+    'past_grades': np.random.uniform(60, 100, num_students),
+    # Average past grades
+    'extracurricular': np.random.choice([0, 1], num_students),
+    # Participation in extracurricular activities
+    'parental_support': np.random.choice([0, 1], num_students),
+    # Parental support indicator
+}
+
+# Creating the DataFrame
+df = pd.DataFrame(data)
+
+# Create a synthetic 'final_grade' column
+df['final_grade'] = (
+    0.3 * df['attendance'] +
+    0.2 * df['homework_completion'] +
+    0.2 * df['study_hours'] +
+    0.2 * df['past_grades'] +
+    0.05 * df['extracurricular'] +
+    0.05 * df['parental_support'] * 10
+).clip(0, 100)
+
+# Split the data into training and testing sets
+X = df.drop(['student_id', 'final_grade'], axis=1)
+y = df['final_grade']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Linear Regression model
+lr_model = LinearRegression()
+lr_model.fit(X_train, y_train)
+y_pred_lr = lr_model.predict(X_test)
+
+# Random Forest model
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+y_pred_rf = rf_model.predict(X_test)
+
+# Evaluate Linear Regression
+mse_lr = mean_squared_error(y_test, y_pred_lr)
+r2_lr = r2_score(y_test, y_pred_lr)
+# Evaluate Random Forest
+mse_rf = mean_squared_error(y_test, y_pred_rf)
+r2_rf = r2_score(y_test, y_pred_rf)
+
+# Print results
+print(f"Linear Regression MSE: {mse_lr:.2f}, R²: {r2_lr:.2f}")
+print(f"Random Forest MSE: {mse_rf:.2f}, R²: {r2_rf:.2f}")
+
+# Plot actual vs predicted
+plt.figure(figsize=(10, 5))
+plt.scatter(y_test, y_pred_lr, alpha=0.5, label='Linear Regression', color='blue')
+plt.scatter(y_test, y_pred_rf, alpha=0.5, label='Random Forest', color='green')
+plt.plot([0, 100], [0, 100], '--', color='gray')
+plt.xlabel('Actual Final Grade')
+plt.ylabel('Predicted Final Grade')
+plt.legend()
+plt.title('Actual vs Predicted Final Grades')
+plt.show()
+
+# Feature Importance from Random Forest
+importances = rf_model.feature_importances_
+indices = np.argsort(importances)[::-1]
+features = X.columns
+
+plt.figure(figsize=(10, 5))
+plt.title("Feature Importances")
+plt.bar(range(X.shape[1]), importances[indices], align="center")
+plt.xticks(range(X.shape[1]), features[indices], rotation=90)
+plt.xlim([-1, X.shape[1]])
+plt.show()
+
+# Save the dataset to a CSV file
+df.to_csv('student_performance.csv', index=False)
+
+# Correlation matrix
+plt.figure(figsize=(10, 8))
+correlation_matrix = df.corr()
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
+plt.title('Correlation Matrix')
+plt.show()
+
+# Residual plot for Linear Regression
+plt.figure(figsize=(10, 5))
+# Use y_test as the single positional argument, representing the independent variable
+sns.residplot(x=y_test, y=y_pred_lr, lowess=True, color='blue')
+plt.title('Residuals of Linear Regression Model')
+plt.xlabel('Actual Final Grade')
+plt.ylabel('Residuals')
+plt.show()
+
